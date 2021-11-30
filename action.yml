@@ -2,8 +2,8 @@ name: 'AWS Request Signer SigV4'
 description: 'Signs and request using AWS SigV4'
 author: 'Emilio B. Pedrollo'
 branding:
-  color: 'orange'
   icon: 'edit-3'
+  color: 'orange'
 inputs:
   method:
     description: 'The request method'
@@ -29,8 +29,13 @@ inputs:
   payload:
     description: 'The request''s Payload'
     required: false
-
-
+outputs:
+  body:
+    description: 'The body of the response'
+  status:
+    description: 'The response''s status code'
+  headers:
+    description: 'An json string with response''s headers'
 runs:
   using: 'node12'
   main: 'index.js'
