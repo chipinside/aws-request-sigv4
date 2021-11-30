@@ -1,0 +1,37 @@
+name: 'AWS Request Signer SigV4'
+description: 'Signs and request using AWS SigV4'
+author: 'Emilio B. Pedrollo'
+branding:
+  color: 'orange'
+  icon: 'edit-3'
+inputs:
+  method:
+    description: 'The request method'
+    required: false
+    default: 'GET'
+  region:
+    description: 'AWS Region'
+    required: false
+  service:
+    description: 'The AWS Service'
+    required: true
+  domain:
+    description: 'The AWS API domain'
+    required: true
+  content_type:
+    description: 'Request''s content-type'
+    required: false
+    default: 'application/json'
+  uri:
+    description: 'The request''s URI'
+    default: '/'
+    required: false
+  payload:
+    description: 'The request''s Payload'
+    required: false
+
+
+runs:
+  using: 'node12'
+  main: 'index.js'
+
