@@ -36,6 +36,9 @@ new Promise(async (resolve, reject) => {
   }, reject);
 
 }).then((response) => {
+  core.info(response.body)
+  core.info(JSON.stringify(response.headers))
+  core.info(response.status)
   core.setOutput('body', response.body)
   core.setOutput('headers', JSON.stringify(response.headers))
   core.setOutput('status', response.status)
