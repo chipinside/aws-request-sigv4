@@ -1,5 +1,5 @@
 const AWS = require('aws-sdk');
-const core = require('@actions/core')
+const core = require('@actions/core');
 
 let method = core.getInput('method');
 let region = core.getInput('region');
@@ -11,6 +11,8 @@ let payload = core.getInput('payload')
 
 let endpoint = new AWS.Endpoint(domain);
 let request = new AWS.HttpRequest(endpoint, region);
+
+console.log(payload)
 
 request.method = method;
 request.path = uri;
