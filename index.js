@@ -12,7 +12,7 @@ let payload = core.getInput('payload')
 let endpoint = new AWS.Endpoint(domain);
 let request = new AWS.HttpRequest(endpoint, region);
 
-console.log(payload)
+core.info(payload)
 
 request.method = method;
 request.path = uri;
