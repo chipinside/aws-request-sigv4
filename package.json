@@ -3,5 +3,6 @@
   "dependencies": {
     "@actions/core": "^1.6.0",
     "aws-sdk": "^2.1039.0"
-  }
+  },
+  "packageManager": "yarn@1.22.19"
 }

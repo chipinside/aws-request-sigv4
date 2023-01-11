@@ -19,7 +19,7 @@ request.path = uri;
 request.body = payload;
 request.headers['host'] = domain;
 request.headers['Content-Type'] = contentType;
-request.headers['Content-Length'] = Buffer.byteLength(request.body);
+request.headers['Content-Length'] = Buffer.byteLength(request.body).toString();
 
 let credentials = new AWS.EnvironmentCredentials('AWS');
 let signer = new AWS.Signers.V4(request, service);

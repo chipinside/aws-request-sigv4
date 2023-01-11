@@ -37,6 +37,6 @@ outputs:
   headers:
     description: 'An json string with response''s headers'
 runs:
-  using: 'node12'
+  using: 'node16'
   main: 'index.js'
 
