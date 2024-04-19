@@ -1,50 +1,60 @@
-const AWS = require('aws-sdk');
-const core = require('@actions/core');
+import { SignatureV4 } from "@aws-sdk/signature-v4";
+import { fromNodeProviderChain } from "@aws-sdk/credential-providers";
+import { Sha256 } from "@aws-crypto/sha256-js";
+import querystring from 'querystring'
+import core from '@actions/core';
 
 let method = core.getInput('method');
 let region = core.getInput('region');
-let domain = core.getInput('domain');
+let hostname = core.getInput('domain');
 let service = core.getInput('service')
 let contentType = core.getInput('content_type');
 let uri = core.getInput('uri');
-let payload = core.getInput('payload')
+let body = core.getInput('payload');
 
-let endpoint = new AWS.Endpoint(domain);
-let request = new AWS.HttpRequest(endpoint, region);
+const credentialProvider = fromNodeProviderChain();
+const credentials = await credentialProvider();
 
-core.info(payload)
+const signer = new SignatureV4({
+  credentials: credentials,
+  region: region,
+  service: service,
+  sha256: Sha256
+});
 
-request.method = method;
-request.path = uri;
-request.body = payload;
-request.headers['host'] = domain;
-request.headers['Content-Type'] = contentType;
-request.headers['Content-Length'] = Buffer.byteLength(request.body).toString();
+const [path, query] = uri.split('?')
 
-let credentials = new AWS.EnvironmentCredentials('AWS');
-let signer = new AWS.Signers.V4(request, service);
-signer.addAuthorization(credentials, new Date());
-
-let client = new AWS.HttpClient();
-
-new Promise(async (resolve, reject) => {
-
-  client.handleRequest(request, null, function(response) {
-    let status = response.statusCode
-    let headers = response.headers
-    let body = ''
-    response.on('data', (buffer) => { body += buffer })
-    response.on('end', () => { resolve({body, status, headers}) })
-  }, reject);
-
-}).then((response) => {
-  core.info(response.body)
-  core.info(JSON.stringify(response.headers))
-  core.info(response.status)
-  core.setOutput('body', response.body)
-  core.setOutput('headers', JSON.stringify(response.headers))
-  core.setOutput('status', response.status)
-}).catch((err) => {
-  core.setFailed(err);
+const signedRequest= await signer.sign({
+  path: path,
+  query: querystring.parse(query || ''),
+  hostname: hostname,
+  body: body,
+  headers: {
+    host: hostname, // This is necessary.
+    'Content-Type': contentType
+  },
+  method: method,
 })
 
+function headersToJSON(headers) {
+  const headersObj = {};
+  headers.forEach((value, name) => {
+    headersObj[name] = value;
+  });
+  return headersObj;
+}
+
+fetch(
+  `https://${hostname}${uri}`, signedRequest
+).then(async (response) => {
+  const body = await response.text();
+  const headers = headersToJSON(response.headers)
+  core.info(body);
+  core.info(JSON.stringify(headers));
+  core.info(response.status.toString())
+  core.setOutput('body', body)
+  core.setOutput('headers', JSON.stringify(headers))
+  core.setOutput('status', response.status)
+}, (error) => {
+  core.setFailed(error);
+});
