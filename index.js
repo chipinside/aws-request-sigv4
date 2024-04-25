@@ -4,16 +4,18 @@ import { Sha256 } from "@aws-crypto/sha256-js";
 import querystring from 'querystring'
 import core from '@actions/core';
 
-let method = core.getInput('method');
-let region = core.getInput('region');
-let hostname = core.getInput('domain');
-let service = core.getInput('service')
-let contentType = core.getInput('content_type');
-let uri = core.getInput('uri');
-let body = core.getInput('payload');
+const method = core.getInput('method');
+const region = core.getInput('region');
+const hostname = core.getInput('domain');
+const service = core.getInput('service')
+const contentType = core.getInput('content_type');
+const uri = core.getInput('uri');
+const body = (core.getInput('payload') || null) ?? undefined;
 
 const credentialProvider = fromNodeProviderChain();
 const credentials = await credentialProvider();
+
+// body = body !== '' ? body : undefined;
 
 const signer = new SignatureV4({
   credentials: credentials,
@@ -56,5 +58,6 @@ fetch(
   core.setOutput('headers', JSON.stringify(headers))
   core.setOutput('status', response.status)
 }, (error) => {
+  core.error(error)
   core.setFailed(error);
 });
